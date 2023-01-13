@@ -1,0 +1,20 @@
+{
+	"name": "ClaimDiagnosisSQL",
+	"properties": {
+		"parameters": {
+			"DatabaseName": {
+				"type": "string"
+			},
+			"ServerName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "fhir",
+			"table": "ClaimDiagnosis"
+		}
+	}
+}
