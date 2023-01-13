@@ -31,8 +31,55 @@
 		"cells": [
 			{
 				"cell_type": "code",
+				"metadata": {
+					"tags": [
+						"parameters"
+					]
+				},
 				"source": [
-					"test"
+					"StorageName = \"medicaldl\"\r\n",
+					"DatasetSize = \"1tb\""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"raw_location = \"abfss://raw@\" + StorageName + \".dfs.core.windows.net/fhir_ndjson/\"+ DatasetSize +\"/*/\"\r\n",
+					"processed_location = \"abfss://processed@\" + StorageName+ \".dfs.core.windows.net/fhir/\"+ DatasetSize +\"/\"\r\n",
+					"write_mode=\"overwrite\""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Claim_df = spark.read.option(\"multiline\", \"false\").json(raw_location+\"Claim.ndjson\")\r\n",
+					"Claim_df.write.mode(write_mode).parquet(processed_location+\"Claim/\")\r\n",
+					"#display(Claim_df.limit(10))\r\n",
+					"#Claim_df.count()"
 				],
 				"execution_count": null
 			}
