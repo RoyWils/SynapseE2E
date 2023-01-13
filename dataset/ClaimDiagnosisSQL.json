@@ -1,6 +1,20 @@
 {
 	"name": "ClaimDiagnosisSQL",
 	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SynapseDedicatedPoolLS",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"DatabaseName": {
+					"value": "@dataset().DatabaseName",
+					"type": "Expression"
+				},
+				"ServerName": {
+					"value": "@dataset().ServerName",
+					"type": "Expression"
+				}
+			}
+		},
 		"parameters": {
 			"DatabaseName": {
 				"type": "string"
