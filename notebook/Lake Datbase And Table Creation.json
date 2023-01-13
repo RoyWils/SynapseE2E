@@ -1,5 +1,5 @@
 {
-	"name": "Notebook 1",
+	"name": "Lake Datbase And Table Creation",
 	"properties": {
 		"nbformat": 4,
 		"nbformat_minor": 2,
@@ -13,7 +13,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "220be836-cfd6-4440-8365-d2e010590399"
+				"spark.autotune.trackingId": "ceff6893-6dac-4e42-899c-a20460189fe9"
 			}
 		},
 		"metadata": {
