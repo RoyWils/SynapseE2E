@@ -769,6 +769,278 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/FHIR_Pipeline4Observation_Spark_OC')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "NDJSON_Ingestion_Observation",
+						"type": "SynapseNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "Observation_Ingestion_NDJSON2Parquet",
+								"type": "NotebookReference"
+							},
+							"parameters": {
+								"StorageName": {
+									"value": {
+										"value": "@pipeline().parameters.StorageName",
+										"type": "Expression"
+									},
+									"type": "string"
+								}
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": {
+									"value": "@pipeline().parameters.SparkPoolName",
+									"type": "Expression"
+								},
+								"type": "BigDataPoolReference"
+							},
+							"executorSize": null,
+							"conf": {
+								"spark.dynamicAllocation.enabled": null,
+								"spark.dynamicAllocation.minExecutors": null,
+								"spark.dynamicAllocation.maxExecutors": null
+							},
+							"driverSize": null,
+							"numExecutors": null
+						}
+					},
+					{
+						"name": "ObservationParquetFlatten_Large",
+						"type": "SynapseNotebook",
+						"dependsOn": [
+							{
+								"activity": "NDJSON_Ingestion_Observation",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "ObservationParquetFlatten_Large",
+								"type": "NotebookReference"
+							},
+							"parameters": {
+								"StorageName": {
+									"value": {
+										"value": "@pipeline().parameters.StorageName",
+										"type": "Expression"
+									},
+									"type": "string"
+								}
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": {
+									"value": "@pipeline().parameters.SparkPoolName",
+									"type": "Expression"
+								},
+								"type": "BigDataPoolReference"
+							},
+							"executorSize": null,
+							"conf": {
+								"spark.dynamicAllocation.enabled": null,
+								"spark.dynamicAllocation.minExecutors": null,
+								"spark.dynamicAllocation.maxExecutors": null
+							},
+							"driverSize": null,
+							"numExecutors": null
+						}
+					},
+					{
+						"name": "Observation_Parquet_large2SQL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Create Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": {
+										"value": "@concat('fhir/',pipeline().parameters.DatasetSize,'/Observation_main')",
+										"type": "Expression"
+									},
+									"wildcardFileName": "*.parquet",
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"allowCopyCommand": true,
+								"copyCommandSettings": {},
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "StorageLS",
+									"type": "LinkedServiceReference",
+									"parameters": {
+										"StorageName": {
+											"value": "@pipeline().parameters.StorageName",
+											"type": "Expression"
+										}
+									}
+								},
+								"path": "staging"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ObservationMain_LargeParquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"StorageName": {
+										"value": "@pipeline().parameters.StorageName",
+										"type": "Expression"
+									},
+									"DatasetSize": {
+										"value": "@pipeline().parameters.DatasetSize",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Observation_SQLDS",
+								"type": "DatasetReference",
+								"parameters": {
+									"DatabaseName": {
+										"value": "@pipeline().parameters.DatabaseName",
+										"type": "Expression"
+									},
+									"ServerName": {
+										"value": "@pipeline().parameters.ServerName",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Create Tables",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "ObservationParquetFlatten_Large",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "SynapseDedicatedPoolLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"DatabaseName": {
+									"value": "@pipeline().parameters.DatabaseName",
+									"type": "Expression"
+								},
+								"ServerName": {
+									"value": "@pipeline().parameters.ServerName",
+									"type": "Expression"
+								}
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "IF OBJECT_ID('fhir.ObservationMain') IS NOT NULL\r\nBEGIN\r\n    DROP TABLE [fhir].[ObservationMain]\r\nEND\r\n\r\nCREATE TABLE [fhir].[ObservationMain]\r\n( \r\n\t[Observation_id] [varchar](64)  NULL,\r\n\t[resourceType] [varchar](100)  NULL,\r\n\t[issued] VARCHAR(30)  NULL,\r\n\t[status] [varchar](10)  NULL,\r\n\t[patient_id_reference] [varchar](64)  NULL,\r\n\t[encounter_id_reference] [varchar](64)  NULL,\r\n\t[effectiveDateTime] VARCHAR(30)  NULL,\r\n\t[valueQuantity_code] [varchar](50)  NULL,\r\n\t[valueQuantity_system] [varchar](100)  NULL,\r\n\t[valueQuantity_unit] [varchar](50)  NULL,\r\n\t[valueQuantity_value] [float]  NULL,\r\n\t[valueString] [nvarchar](200)  NULL\r\n)\r\nWITH\r\n(\r\n\tDISTRIBUTION = ROUND_ROBIN,\r\n\tHEAP\r\n)"
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"StorageName": {
+						"type": "string",
+						"defaultValue": "rwse2estorage"
+					},
+					"DatabaseName": {
+						"type": "string",
+						"defaultValue": "rwse2edefaultsqlpool"
+					},
+					"ServerName": {
+						"type": "string",
+						"defaultValue": "rwse2esynapsews"
+					},
+					"SparkPoolName": {
+						"type": "string",
+						"defaultValue": "rwse2esparkpool"
+					},
+					"DatasetSize": {
+						"type": "string",
+						"defaultValue": "1tb"
+					}
+				},
+				"folder": {
+					"name": "Observation"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/notebooks/Observation_Ingestion_NDJSON2Parquet')]",
+				"[concat(variables('workspaceId'), '/notebooks/ObservationParquetFlatten_Large')]",
+				"[concat(variables('workspaceId'), '/datasets/ObservationMain_LargeParquet')]",
+				"[concat(variables('workspaceId'), '/datasets/Observation_SQLDS')]",
+				"[concat(variables('workspaceId'), '/linkedServices/SynapseDedicatedPoolLS')]",
+				"[concat(variables('workspaceId'), '/linkedServices/StorageLS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/ClaimDiagnosisParquetLarge')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -1217,6 +1489,88 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/ObservationMain_LargeParquet')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "StorageLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"StorageName": {
+							"value": "@dataset().StorageName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"StorageName": {
+						"type": "string"
+					},
+					"DatasetSize": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "*",
+						"folderPath": {
+							"value": "@dataset().DatasetSize",
+							"type": "Expression"
+						},
+						"fileSystem": "curated"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/StorageLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Observation_SQLDS')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SynapseDedicatedPoolLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"DatabaseName": {
+							"value": "@dataset().DatabaseName",
+							"type": "Expression"
+						},
+						"ServerName": {
+							"value": "@dataset().ServerName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"DatabaseName": {
+						"type": "string"
+					},
+					"ServerName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "fhir",
+					"table": "ObservationMain"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SynapseDedicatedPoolLS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/Sink_DataPrep_Curated_DS')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -1581,7 +1935,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "b6e81c50-ab2c-44ee-b8c7-3fe0987ebe32"
+						"spark.autotune.trackingId": "e61f5142-c38f-468f-83d8-1d6106d90dbd"
 					}
 				},
 				"metadata": {
@@ -1606,7 +1960,8 @@
 						"sparkVersion": "3.1",
 						"nodeCount": 5,
 						"cores": 4,
-						"memory": 28
+						"memory": 28,
+						"automaticScaleJobs": false
 					},
 					"sessionKeepAliveTimeout": 180
 				},
@@ -2116,7 +2471,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "9d5052cc-6aa0-41eb-a9f2-42be471b3c4d"
+						"spark.autotune.trackingId": "738c5ced-6f39-4774-bbe8-6ff5ad3ed9cf"
 					}
 				},
 				"metadata": {
@@ -2141,7 +2496,8 @@
 						"sparkVersion": "3.1",
 						"nodeCount": 5,
 						"cores": 4,
-						"memory": 28
+						"memory": 28,
+						"automaticScaleJobs": false
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -2231,7 +2587,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "fa311c3a-535f-4730-ad86-cd5de390ee95"
+						"spark.autotune.trackingId": "e1ce8d85-badb-4474-997c-907352267d10"
 					}
 				},
 				"metadata": {
@@ -2406,6 +2762,413 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/ObservationParquetFlatten_Large')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Observation"
+				},
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "rwse2esparkpool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "3b0dd8aa-3694-4b65-b494-4e9d522db049"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/fd0d9e7a-b5dc-46f5-8d1d-a694d10dd09f/resourceGroups/rgrwse2edemo/providers/Microsoft.Synapse/workspaces/rwse2esynapsews/bigDataPools/rwse2esparkpool",
+						"name": "rwse2esparkpool",
+						"type": "Spark",
+						"endpoint": "https://rwse2esynapsews.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/rwse2esparkpool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.1",
+						"nodeCount": 5,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"tags": [
+								"parameters"
+							]
+						},
+						"source": [
+							"StorageName = \"rwse2estorage\"\r\n",
+							"DatasetSize = \"1tb\""
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"curated_location = \"abfss://curated@\"+ StorageName +\".dfs.core.windows.net/fhir/\"+DatasetSize+\"/\"\r\n",
+							"processed_location = \"abfss://processed@\"+StorageName+\".dfs.core.windows.net/fhir/\"+DatasetSize+\"/\"\r\n",
+							"write_mode=\"overwrite\""
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"Observation_df=spark.read.parquet(processed_location+\"Observation/\")"
+						],
+						"outputs": [],
+						"execution_count": 2
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": true
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": false
+						},
+						"source": [
+							"#display(Observation_df.limit(10))"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.sql.functions import regexp_replace\r\n",
+							"\r\n",
+							"Observation_df=Observation_df.withColumn(\"subject\",regexp_replace(\"subject.reference\",\"Patient/\",\"\")).withColumn(\"encounter\",regexp_replace(\"encounter.reference\",\"Encounter/\",\"\"))\r\n",
+							"Observation_df=Observation_df.withColumnRenamed(\"id\",\"Observation_id\")\r\n",
+							"Observation_df=Observation_df.withColumnRenamed(\"subject\",\"patient_id_reference\")\r\n",
+							"Observation_df=Observation_df.withColumnRenamed(\"encounter\",\"encounter_id_reference\")"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": true
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"Observation_df.printSchema()"
+						],
+						"outputs": [],
+						"execution_count": 6
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.sql.functions import explode\r\n",
+							"\r\n",
+							"Observation_main_df = Observation_df.select(\r\n",
+							"    \"Observation_id\",\"resourceType\",\"issued\",\"status\", \"patient_id_reference\",\"encounter_id_reference\",\"effectiveDateTime\",\r\n",
+							"    \"valueQuantity.code\",\"valueQuantity.system\",\"valueQuantity.unit\",\"valueQuantity.value\",\"valueString\").toDF(*(\r\n",
+							"    \"Observation_id\",\"resourceType\",\"issued\",\"status\",\"patient_id_reference\",\"encounter_id_reference\",\"effectiveDateTime\",\r\n",
+							"    \"valueQuantity_code\",\"valueQuantity_system\",\r\n",
+							"    \"valueQuantity_unit\",\"valueQuantity_value\",\"valueString\"))"
+						],
+						"outputs": [],
+						"execution_count": 8
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"Observation_main_df.write.mode(write_mode).parquet(curated_location+\"Observation_main/\")\r\n",
+							"#Observation_main_df.write.format(\"delta\").saveAsTable(\"fhirlakedb.Observation_main\")\r\n",
+							"#Patient_identifier_df.write.format(\"delta\").save(curated_location+\"Condition_clinicalStatus_delta/\")"
+						],
+						"outputs": [],
+						"execution_count": 9
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.sql.functions import explode\r\n",
+							"\r\n",
+							"Observation_category_explode_df = Observation_df.select(\r\n",
+							"    \"Observation_id\",\r\n",
+							"    explode(Observation_df.category)).toDF(*(\"Observation_id\",\"category\"))\r\n",
+							"\r\n",
+							"Observation_category_explode2_df = Observation_category_explode_df.select(\r\n",
+							"    \"Observation_id\",\r\n",
+							"    explode(Observation_category_explode_df.category.coding)).toDF(*(\"Observation_id\",\"category\"))    \r\n",
+							"\r\n",
+							"Observation_category_df = Observation_category_explode2_df.select(\"Observation_id\",\"category.*\").toDF(*(\"Observation_id\",\"category_code\",\"category_display\",\"category_system\"))"
+						],
+						"outputs": [],
+						"execution_count": 10
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"Observation_category_df.write.mode(write_mode).parquet(curated_location+\"Observation_category/\")"
+						],
+						"outputs": [],
+						"execution_count": 13
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.sql.functions import explode\r\n",
+							"\r\n",
+							"Observation_code_explode_df = Observation_df.select(\r\n",
+							"    \"Observation_id\",\"code.text\",explode(Observation_df.code.coding)).toDF(*(\"Observation_id\",\"text\",\"coding\"))\r\n",
+							"Observation_code_df = Observation_code_explode_df.select(\"Observation_id\",\"text\",\"coding.*\").toDF(*(\"Observation_id\",\"code_text\",\"coding_code\",\"coding_display\",\"coding_system\"))  "
+						],
+						"outputs": [],
+						"execution_count": 15
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"Observation_code_df.write.mode(write_mode).parquet(curated_location+\"Observation_code/\")"
+						],
+						"outputs": [],
+						"execution_count": 16
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.sql.functions import explode\r\n",
+							"from pyspark.sql.functions import explode_outer\r\n",
+							"\r\n",
+							"Observation_component_explode_df = Observation_df.select(\r\n",
+							"    \"Observation_id\",explode(Observation_df.component))\r\n",
+							"\r\n",
+							"Observation_component_explode2_df = Observation_component_explode_df.select(\"Observation_id\",explode_outer(Observation_component_explode_df.col.code.coding),\"col.code.text\",\r\n",
+							"    \"col.valueQuantity.code\",\"col.valueQuantity.system\",\"col.valueQuantity.unit\",\"col.valueQuantity.value\").toDF(*(\"Observation_id\",\"component_code\",\"component_text\",\r\n",
+							"    \"component_valueQuantity_code\",\"component_valueQuantity_system\",\"component_valueQuantity_unit\",\"component_valueQuantity_value\"))   \r\n",
+							"\r\n",
+							"Observation_component_df = Observation_component_explode2_df.select(\"Observation_id\",\"component_code.*\",\"component_text\",\r\n",
+							"    \"component_valueQuantity_code\",\"component_valueQuantity_system\",\"component_valueQuantity_unit\",\"component_valueQuantity_value\").toDF(*(\"Observation_id\",\"component_code\",\r\n",
+							"    \"component_display\",\"component_system\",\"component_text\",\r\n",
+							"    \"component_valueQuantity_code\",\"component_valueQuantity_system\",\"component_valueQuantity_unit\",\"component_valueQuantity_value\"))"
+						],
+						"outputs": [],
+						"execution_count": 4
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"Observation_component_df.write.mode(write_mode).parquet(curated_location+\"Observation_component/\")"
+						],
+						"outputs": [],
+						"execution_count": 7
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.sql.functions import explode\r\n",
+							"\r\n",
+							"Observation_valueCodeableConcept_explode_df = Observation_df.select(\r\n",
+							"    \"Observation_id\",explode(Observation_df.valueCodeableConcept.coding),\"valueCodeableConcept.text\").toDF(*(\"Observation_id\",\"coding\",\"valueCodeableConcept_text\"))\r\n",
+							"\r\n",
+							"Observation_valueCodeableConcept_df = Observation_valueCodeableConcept_explode_df.select(\"Observation_id\",\"coding.*\",\"valueCodeableConcept_text\").toDF(*(\"Observation_id\",\r\n",
+							"    \"valueCodeableConcept_code\", \"valueCodeableConcept_display\",\"valueCodeableConcept_system\",\"valueCodeableConcept_text\"))"
+						],
+						"outputs": [],
+						"execution_count": 22
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"Observation_valueCodeableConcept_df.write.mode(write_mode).parquet(curated_location+\"Observation_valueCodeableConcept/\")"
+						],
+						"outputs": [],
+						"execution_count": 26
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/Observation_Ingestion_NDJSON2Parquet')]",
 			"type": "Microsoft.Synapse/workspaces/notebooks",
 			"apiVersion": "2019-06-01-preview",
@@ -2429,7 +3192,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "3501ce1a-4b3e-4f45-800d-fb174bac62c7"
+						"spark.autotune.trackingId": "b5f89175-cf38-4024-bcba-45b6c3f29f56"
 					}
 				},
 				"metadata": {
@@ -2522,6 +3285,134 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/Patient_Ingestion_NDJSON2Parquet')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Patient"
+				},
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "rwse2esparkpool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "d06c5a0c-36bc-4c7c-848c-dbce3a2886a0"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "python"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/fd0d9e7a-b5dc-46f5-8d1d-a694d10dd09f/resourceGroups/rgrwse2edemo/providers/Microsoft.Synapse/workspaces/rwse2esynapsews/bigDataPools/rwse2esparkpool",
+						"name": "rwse2esparkpool",
+						"type": "Spark",
+						"endpoint": "https://rwse2esynapsews.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/rwse2esparkpool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.1",
+						"nodeCount": 5,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"tags": [
+								"parameters"
+							]
+						},
+						"source": [
+							"StorageName = \"rwse2estorage\"\r\n",
+							"DatasetSize = \"1tb\""
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"raw_location = \"abfss://raw@\" + StorageName + \".dfs.core.windows.net/fhir_ndjson/\"+ DatasetSize +\"/*/\"\r\n",
+							"processed_location = \"abfss://processed@\" + StorageName + \".dfs.core.windows.net/fhir/\"+ DatasetSize +\"/\"\r\n",
+							"write_mode=\"overwrite\""
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"patient_df = spark.read.option(\"multiline\", \"false\").json(raw_location+\"Patient.ndjson\")\r\n",
+							"patient_df.write.mode(write_mode).parquet(processed_location+\"Patient/\")\r\n",
+							"#display(patient_df.limit(10))\r\n",
+							"#patient_df.count()"
+						],
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/rwse2edefaultsqlpool')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "northeurope"
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/rwse2esparkpool')]",
 			"type": "Microsoft.Synapse/workspaces/bigDataPools",
 			"apiVersion": "2019-06-01-preview",
@@ -2541,18 +3432,6 @@
 				"sparkVersion": "3.1",
 				"isComputeIsolationEnabled": false,
 				"sessionLevelPackagesEnabled": false,
-				"annotations": []
-			},
-			"dependsOn": [],
-			"location": "northeurope"
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/rwse2edefaultsqlpool')]",
-			"type": "Microsoft.Synapse/workspaces/sqlPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"collation": "SQL_Latin1_General_CP1_CI_AS",
-				"maxSizeBytes": 263882790666240,
 				"annotations": []
 			},
 			"dependsOn": [],
