@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "rwse2esynapsews"
+		},
+		"rwse2esynapsews-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:rwse2esynapsews.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"Source_Dataset_LS_sasUri": {
+			"value": ""
+		},
+		"StorageLS_properties_typeProperties_url": {
+			"value": "@{concat('https://',linkedService().StorageName,'.dfs.core.windows.net')}"
+		},
+		"rwse2esynapsews-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://rwse2estorage.dfs.core.windows.net/"
+		}
+	}
+}
