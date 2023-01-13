@@ -484,7 +484,7 @@
 			},
 			"SparkPoolName": {
 				"type": "string",
-				"defaultValue": "synapsee2espark"
+				"defaultValue": "rwe2esparkpool"
 			},
 			"DatasetSize": {
 				"type": "string",
