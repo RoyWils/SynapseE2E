@@ -2,6 +2,12 @@
 	"name": "Source_Dataset_LS",
 	"type": "Microsoft.Synapse/workspaces/linkedservices",
 	"properties": {
+		"parameters": {
+			"folderPath": {
+				"type": "string",
+				"defaultValue": "@dataset().DatasetSize"
+			}
+		},
 		"annotations": [],
 		"type": "AzureBlobStorage",
 		"typeProperties": {
