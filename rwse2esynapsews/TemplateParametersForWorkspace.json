@@ -5,6 +5,9 @@
 		"workspaceName": {
 			"value": "rwse2esynapsews"
 		},
+		"SynapseDedicatedPoolLS_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=\"@{concat(linkedService().ServerName,'.sql.azuresynapse.net')}\";Initial Catalog=@{linkedService().DatabaseName}"
+		},
 		"rwse2esynapsews-WorkspaceDefaultSqlServer_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:rwse2esynapsews.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
 		},
