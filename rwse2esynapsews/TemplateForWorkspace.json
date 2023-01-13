@@ -742,7 +742,7 @@
 					},
 					"SparkPoolName": {
 						"type": "string",
-						"defaultValue": "rwe2esparkpool"
+						"defaultValue": "rwse2esparkpool"
 					},
 					"DatasetSize": {
 						"type": "string",
@@ -2231,7 +2231,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "eecf91ac-4891-47b0-b346-9c253c2526cb"
+						"spark.autotune.trackingId": "fa311c3a-535f-4730-ad86-cd5de390ee95"
 					}
 				},
 				"metadata": {
@@ -2256,7 +2256,8 @@
 						"sparkVersion": "3.1",
 						"nodeCount": 5,
 						"cores": 4,
-						"memory": 28
+						"memory": 28,
+						"automaticScaleJobs": false
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -2405,16 +2406,120 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/rwse2edefaultsqlpool')]",
-			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"name": "[concat(parameters('workspaceName'), '/Observation_Ingestion_NDJSON2Parquet')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
-				"collation": "SQL_Latin1_General_CP1_CI_AS",
-				"maxSizeBytes": 263882790666240,
-				"annotations": []
+				"folder": {
+					"name": "Observation"
+				},
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "rwse2esparkpool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "3501ce1a-4b3e-4f45-800d-fb174bac62c7"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/fd0d9e7a-b5dc-46f5-8d1d-a694d10dd09f/resourceGroups/rgrwse2edemo/providers/Microsoft.Synapse/workspaces/rwse2esynapsews/bigDataPools/rwse2esparkpool",
+						"name": "rwse2esparkpool",
+						"type": "Spark",
+						"endpoint": "https://rwse2esynapsews.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/rwse2esparkpool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.1",
+						"nodeCount": 5,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"tags": [
+								"parameters"
+							]
+						},
+						"source": [
+							"StorageName = \"rwse2estorage\"\r\n",
+							"DatasetSize = \"1tb\""
+						],
+						"outputs": [],
+						"execution_count": 2
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"raw_location = \"abfss://raw@\" + StorageName + \".dfs.core.windows.net/fhir_ndjson/\"+ DatasetSize +\"/*/\"\r\n",
+							"processed_location = \"abfss://processed@\" + StorageName + \".dfs.core.windows.net/fhir/\"+ DatasetSize +\"/\"\r\n",
+							"write_mode=\"overwrite\""
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"Observation_df = spark.read.option(\"multiline\", \"false\").json(raw_location+\"Observation.ndjson\")\r\n",
+							"Observation_df.write.mode(write_mode).parquet(processed_location+\"Observation/\")\r\n",
+							"#display(Observation_df.limit(10))\r\n",
+							"#Observation_df.count()"
+						],
+						"outputs": [],
+						"execution_count": 3
+					}
+				]
 			},
-			"dependsOn": [],
-			"location": "northeurope"
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/rwse2esparkpool')]",
@@ -2436,6 +2541,18 @@
 				"sparkVersion": "3.1",
 				"isComputeIsolationEnabled": false,
 				"sessionLevelPackagesEnabled": false,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "northeurope"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/rwse2edefaultsqlpool')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
 				"annotations": []
 			},
 			"dependsOn": [],
