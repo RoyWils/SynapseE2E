@@ -75,7 +75,27 @@
 						"referenceName": "PatientJSON_Flatten_large",
 						"type": "DataFlowReference",
 						"datasetParameters": {
+							"PatientNDJSON": {
+								"StorageName": {
+									"value": "@pipeline().parameters.StorageName",
+									"type": "Expression"
+								},
+								"DatasetSize": {
+									"value": "@pipeline().parameters.DatasetSize",
+									"type": "Expression"
+								}
+							},
 							"sinkPatientIdentifier": {
+								"StorageName": {
+									"value": "@pipeline().parameters.StorageName",
+									"type": "Expression"
+								},
+								"DatasetSize": {
+									"value": "@pipeline().parameters.DatasetSize",
+									"type": "Expression"
+								}
+							},
+							"sinkPatientExtension": {
 								"StorageName": {
 									"value": "@pipeline().parameters.StorageName",
 									"type": "Expression"
@@ -575,19 +595,19 @@
 		"parameters": {
 			"StorageName": {
 				"type": "string",
-				"defaultValue": "rwse2estorage"
+				"defaultValue": "synapsee2elake"
 			},
 			"DatabaseName": {
 				"type": "string",
-				"defaultValue": "rwse2edefaultsqlpool"
+				"defaultValue": "synapsee2edw"
 			},
 			"ServerName": {
 				"type": "string",
-				"defaultValue": "rwse2esynapsews"
+				"defaultValue": "synapsee2e"
 			},
 			"SparkPoolName": {
 				"type": "string",
-				"defaultValue": "rwse2esparkpool"
+				"defaultValue": "synapsee2espark"
 			},
 			"DatasetSize": {
 				"type": "string",
