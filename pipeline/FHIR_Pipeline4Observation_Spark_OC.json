@@ -122,8 +122,19 @@
 						"storeSettings": {
 							"type": "AzureBlobFSReadSettings",
 							"recursive": true,
+							"wildcardFolderPath": {
+								"value": "@concat('fhir/',pipeline().parameters.DatasetSize,'/Observation_main')",
+								"type": "Expression"
+							},
+							"wildcardFileName": "*.parquet",
 							"enablePartitionDiscovery": false
 						}
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"allowCopyCommand": true,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
 					},
 					"enableStaging": true,
 					"stagingSettings": {
@@ -143,7 +154,33 @@
 				"inputs": [
 					{
 						"referenceName": "ObservationMain_LargeParquet",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"StorageName": {
+								"value": "@pipeline().parameters.StorageName",
+								"type": "Expression"
+							},
+							"DatasetSize": {
+								"value": "@pipeline().parameters.DatasetSize",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Observation_SQLDS",
+						"type": "DatasetReference",
+						"parameters": {
+							"DatabaseName": {
+								"value": "@pipeline().parameters.DatabaseName",
+								"type": "Expression"
+							},
+							"ServerName": {
+								"value": "@pipeline().parameters.ServerName",
+								"type": "Expression"
+							}
+						}
 					}
 				]
 			},
