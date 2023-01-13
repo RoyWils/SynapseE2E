@@ -8,6 +8,10 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "PatientRawParquetLarge",
+						"type": "DatasetReference"
+					},
 					"name": "PatientNDJSON"
 				}
 			],
@@ -20,6 +24,10 @@
 					"name": "sinkPatientIdentifier"
 				},
 				{
+					"dataset": {
+						"referenceName": "PatientExtensionParquetLarge",
+						"type": "DatasetReference"
+					},
 					"name": "sinkPatientExtension"
 				},
 				{
@@ -42,25 +50,10 @@
 				}
 			],
 			"scriptLines": [
-				"source(output(",
-				"          address as (city as string, country as string, extension as (extension as (url as string, valueDecimal as double)[], url as string)[], line as string[], postalCode as string, state as string)[],",
-				"          birthDate as string,",
-				"          communication as (language as (coding as (code as string, display as string, system as string)[], text as string))[],",
-				"          deceasedDateTime as string,",
-				"          extension as (url as string, valueAddress as (city as string, country as string, state as string), valueDecimal as double, valueString as string)[],",
-				"          gender as string,",
-				"          id as string,",
-				"          identifier as (system as string, type as (coding as (code as string, display as string, system as string)[], text as string), value as string)[],",
-				"          maritalStatus as (coding as (code as string, display as string, system as string)[], text as string),",
-				"          multipleBirthBoolean as boolean,",
-				"          multipleBirthInteger as long,",
-				"          name as (family as string, given as string[], prefix as string[], suffix as string[], use as string)[],",
-				"          resourceType as string,",
-				"          telecom as (system as string, use as string, value as string)[],",
-				"          text as (div as string, status as string)",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false) ~> PatientNDJSON",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> PatientNDJSON",
 				"PatientNDJSON foldDown(unroll(identifier.type.coding),",
 				"     mapColumn(",
 				"          patient_id = id,",
@@ -118,12 +111,13 @@
 				"     skipDuplicateMapOutputs: true) ~> sinkPatientIdentifier",
 				"PatientExtensionFlatten sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     truncate: true,",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
 				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
 				"     preCommands: [],",
-				"     postCommands: []) ~> sinkPatientExtension",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkPatientExtension",
 				"PatientAddressFlatten sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
