@@ -1935,7 +1935,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "e61f5142-c38f-468f-83d8-1d6106d90dbd"
+						"spark.autotune.trackingId": "dc62cc15-9d4e-4a26-b1aa-b04f1a9302b3"
 					}
 				},
 				"metadata": {
@@ -2471,7 +2471,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "738c5ced-6f39-4774-bbe8-6ff5ad3ed9cf"
+						"spark.autotune.trackingId": "0672bd89-a0de-404c-b606-413cae8b7087"
 					}
 				},
 				"metadata": {
@@ -2587,7 +2587,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "e1ce8d85-badb-4474-997c-907352267d10"
+						"spark.autotune.trackingId": "d6a89f67-56f8-4511-b305-ee483a773823"
 					}
 				},
 				"metadata": {
@@ -2785,7 +2785,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "3b0dd8aa-3694-4b65-b494-4e9d522db049"
+						"spark.autotune.trackingId": "28062646-0565-43a6-b466-72a60788df4d"
 					}
 				},
 				"metadata": {
@@ -3192,7 +3192,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "b5f89175-cf38-4024-bcba-45b6c3f29f56"
+						"spark.autotune.trackingId": "84d9fc97-084c-42ed-941b-60b17dd76138"
 					}
 				},
 				"metadata": {
@@ -3308,7 +3308,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "d06c5a0c-36bc-4c7c-848c-dbce3a2886a0"
+						"spark.autotune.trackingId": "6473ba5e-e4df-411a-8ee1-31f33e4ebf78"
 					}
 				},
 				"metadata": {
@@ -3436,6 +3436,1052 @@
 			},
 			"dependsOn": [],
 			"location": "northeurope"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PatientAddressParquetLarge')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "StorageLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"StorageName": {
+							"value": "@dataset().StorageName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"StorageName": {
+						"type": "string"
+					},
+					"DatasetSize": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('fhir/',dataset().DatasetSize,'/PatientAddress')",
+							"type": "Expression"
+						},
+						"fileSystem": "curated"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/StorageLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PatientAddressSQL')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SynapseDedicatedPoolLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"DatabaseName": {
+							"value": "@dataset().DatabaseName",
+							"type": "Expression"
+						},
+						"ServerName": {
+							"value": "@dataset().ServerName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"DatabaseName": {
+						"type": "string"
+					},
+					"ServerName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "fhir",
+					"table": "PatientAddress"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SynapseDedicatedPoolLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PatientIdentifierParquetLarge')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "StorageLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"StorageName": {
+							"value": "@dataset().StorageName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"StorageName": {
+						"type": "string"
+					},
+					"DatasetSize": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('fhir/',dataset().DatasetSize,'/PatientIdentifier')",
+							"type": "Expression"
+						},
+						"fileSystem": "curated"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/StorageLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PatientIdentifierSQLLarge')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SynapseDedicatedPoolLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"DatabaseName": {
+							"value": "@dataset().DatabaseName",
+							"type": "Expression"
+						},
+						"ServerName": {
+							"value": "@dataset().ServerName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"DatabaseName": {
+						"type": "string"
+					},
+					"ServerName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "fhir",
+					"table": "PatientIdentifier"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SynapseDedicatedPoolLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PatientRawParquetLarge')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "StorageLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"StorageName": {
+							"value": "@dataset().StorageName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"StorageName": {
+						"type": "string"
+					},
+					"DatasetSize": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('fhir/',dataset().DatasetSize,'/Patient')",
+							"type": "Expression"
+						},
+						"fileSystem": "processed"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/StorageLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PatientExtensionParquetLarge')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "StorageLS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"StorageName": {
+							"value": "@dataset().StorageName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"StorageName": {
+						"type": "string"
+					},
+					"DatasetSize": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('fhir/',dataset().DatasetSize,'/PatientExtension')",
+							"type": "Expression"
+						},
+						"fileSystem": "curated"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/StorageLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PatientJSON_Flatten_large')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Patient"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "PatientRawParquetLarge",
+								"type": "DatasetReference"
+							},
+							"name": "PatientNDJSON"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "PatientIdentifierParquetLarge",
+								"type": "DatasetReference"
+							},
+							"name": "sinkPatientIdentifier"
+						},
+						{
+							"dataset": {
+								"referenceName": "PatientExtensionParquetLarge",
+								"type": "DatasetReference"
+							},
+							"name": "sinkPatientExtension"
+						},
+						{
+							"dataset": {
+								"referenceName": "PatientAddressParquetLarge",
+								"type": "DatasetReference"
+							},
+							"name": "sinkPatientAddress"
+						}
+					],
+					"transformations": [
+						{
+							"name": "PatientIdentifierFlatten"
+						},
+						{
+							"name": "PatientExtensionFlatten"
+						},
+						{
+							"name": "PatientAddressFlatten"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          address as (city as string, country as string, extension as (extension as (url as string, valueDecimal as double)[], url as string)[], line as string[], postalCode as string, state as string)[],",
+						"          birthDate as string,",
+						"          communication as (language as (coding as (code as string, display as string, system as string)[], text as string))[],",
+						"          deceasedDateTime as string,",
+						"          extension as (url as string, valueAddress as (city as string, country as string, state as string), valueDecimal as double, valueString as string)[],",
+						"          gender as string,",
+						"          id as string,",
+						"          identifier as (system as string, type as (coding as (code as string, display as string, system as string)[], text as string), value as string)[],",
+						"          maritalStatus as (coding as (code as string, display as string, system as string)[], text as string),",
+						"          multipleBirthBoolean as boolean,",
+						"          multipleBirthInteger as long,",
+						"          name as (family as string, given as string[], prefix as string[], suffix as string[], use as string)[],",
+						"          resourceType as string,",
+						"          telecom as (system as string, use as string, value as string)[],",
+						"          text as (div as string, status as string)",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> PatientNDJSON",
+						"PatientNDJSON foldDown(unroll(identifier.type.coding),",
+						"     mapColumn(",
+						"          patient_id = id,",
+						"          birthDate,",
+						"          deceasedDateTime,",
+						"          gender,",
+						"          text = maritalStatus.text,",
+						"          multipleBirthBoolean,",
+						"          multipleBirthInteger,",
+						"          resourceType,",
+						"          div = text.div,",
+						"          status = text.status,",
+						"          {identifier.system} = identifier.system,",
+						"          {identifier.type.coding.code} = identifier.type.coding.code,",
+						"          {identifier.type.coding.display} = identifier.type.coding.display,",
+						"          {identifier.type.coding.system} = identifier.type.coding.system,",
+						"          {identifier.type.text} = identifier.type.text,",
+						"          {identifier.value} = identifier.value",
+						"     ),",
+						"     skipDuplicateMapInputs: false,",
+						"     skipDuplicateMapOutputs: false) ~> PatientIdentifierFlatten",
+						"PatientNDJSON foldDown(unroll(extension),",
+						"     mapColumn(",
+						"          patient_id = id,",
+						"          url = extension.url,",
+						"          {extension.valueAddress.city} = extension.valueAddress.city,",
+						"          {extension.valueAddress.country} = extension.valueAddress.country,",
+						"          {extension.valueAddress.state} = extension.valueAddress.state,",
+						"          {extension.valueDecimal} = extension.valueDecimal,",
+						"          {extension.valueString} = extension.valueString",
+						"     ),",
+						"     skipDuplicateMapInputs: false,",
+						"     skipDuplicateMapOutputs: false) ~> PatientExtensionFlatten",
+						"PatientNDJSON foldDown(unroll(address.extension.extension),",
+						"     mapColumn(",
+						"          id,",
+						"          {address.city} = address.city,",
+						"          {address.country} = address.country,",
+						"          {address.extension.extension.url} = address.extension.extension.url,",
+						"          {address.extension.extension.valueDecimal} = address.extension.extension.valueDecimal,",
+						"          {address.extension.url} = address.extension.url,",
+						"          {address.postalCode} = address.postalCode,",
+						"          {address.state} = address.state",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: false) ~> PatientAddressFlatten",
+						"PatientIdentifierFlatten sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkPatientIdentifier",
+						"PatientExtensionFlatten sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkPatientExtension",
+						"PatientAddressFlatten sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkPatientAddress"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/PatientRawParquetLarge')]",
+				"[concat(variables('workspaceId'), '/datasets/PatientIdentifierParquetLarge')]",
+				"[concat(variables('workspaceId'), '/datasets/PatientExtensionParquetLarge')]",
+				"[concat(variables('workspaceId'), '/datasets/PatientAddressParquetLarge')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/FHIR_Pipeline4Patient_DataFlow_OC')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "NDJSON_Ingestion_Patient",
+						"type": "SynapseNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "Patient_Ingestion_NDJSON2Parquet",
+								"type": "NotebookReference"
+							},
+							"parameters": {
+								"StorageName": {
+									"value": {
+										"value": "@pipeline().parameters.StorageName",
+										"type": "Expression"
+									},
+									"type": "string"
+								},
+								"DatasetSize": {
+									"value": {
+										"value": "@pipeline().parameters.DatasetSize",
+										"type": "Expression"
+									},
+									"type": "string"
+								}
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": {
+									"value": "@pipeline().parameters.SparkPoolName",
+									"type": "Expression"
+								},
+								"type": "BigDataPoolReference"
+							},
+							"conf": {
+								"spark.dynamicAllocation.enabled": null,
+								"spark.dynamicAllocation.minExecutors": null,
+								"spark.dynamicAllocation.maxExecutors": null
+							},
+							"numExecutors": null
+						}
+					},
+					{
+						"name": "PatientParquet2Sink",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "NDJSON_Ingestion_Patient",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "PatientJSON_Flatten_large",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"PatientNDJSON": {
+										"StorageName": {
+											"value": "@pipeline().parameters.StorageName",
+											"type": "Expression"
+										},
+										"DatasetSize": {
+											"value": "@pipeline().parameters.DatasetSize",
+											"type": "Expression"
+										}
+									},
+									"sinkPatientIdentifier": {
+										"StorageName": {
+											"value": "@pipeline().parameters.StorageName",
+											"type": "Expression"
+										},
+										"DatasetSize": {
+											"value": "@pipeline().parameters.DatasetSize",
+											"type": "Expression"
+										}
+									},
+									"sinkPatientExtension": {
+										"StorageName": {
+											"value": "@pipeline().parameters.StorageName",
+											"type": "Expression"
+										},
+										"DatasetSize": {
+											"value": "@pipeline().parameters.DatasetSize",
+											"type": "Expression"
+										}
+									},
+									"sinkPatientAddress": {
+										"StorageName": {
+											"value": "@pipeline().parameters.StorageName",
+											"type": "Expression"
+										},
+										"DatasetSize": {
+											"value": "@pipeline().parameters.DatasetSize",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine",
+							"runConcurrently": true
+						}
+					},
+					{
+						"name": "PatientAddress_large2SQL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Create Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": {
+										"value": "@concat('fhir/',pipeline().parameters.DatasetSize,'/PatientAddress')",
+										"type": "Expression"
+									},
+									"wildcardFileName": "*.parquet",
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"allowCopyCommand": true,
+								"copyCommandSettings": {},
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "StorageLS",
+									"type": "LinkedServiceReference",
+									"parameters": {
+										"StorageName": {
+											"value": "@pipeline().parameters.StorageName",
+											"type": "Expression"
+										}
+									}
+								},
+								"path": "staging"
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "id",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "address.city",
+											"type": "String"
+										},
+										"sink": {
+											"name": "address.city",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "address.country",
+											"type": "String"
+										},
+										"sink": {
+											"name": "address.country",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "address.extension.extension.url",
+											"type": "String"
+										},
+										"sink": {
+											"name": "address.extension.extension.url",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "address.extension.extension.valueDecimal",
+											"type": "Double"
+										},
+										"sink": {
+											"name": "address.extension.extension.valueDecimal",
+											"type": "Double"
+										}
+									},
+									{
+										"source": {
+											"name": "address.extension.url",
+											"type": "String"
+										},
+										"sink": {
+											"name": "address.extension.url",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "address.postalCode",
+											"type": "String"
+										},
+										"sink": {
+											"name": "address.postalCode",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "address.state",
+											"type": "String"
+										},
+										"sink": {
+											"name": "address.state",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "PatientAddressParquetLarge",
+								"type": "DatasetReference",
+								"parameters": {
+									"StorageName": {
+										"value": "@pipeline().parameters.StorageName",
+										"type": "Expression"
+									},
+									"DatasetSize": {
+										"value": "@pipeline().parameters.DatasetSize",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "PatientAddressSQL",
+								"type": "DatasetReference",
+								"parameters": {
+									"DatabaseName": {
+										"value": "@pipeline().parameters.DatabaseName",
+										"type": "Expression"
+									},
+									"ServerName": {
+										"value": "@pipeline().parameters.ServerName",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "PatientIdentifier_large2SQL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Create Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": {
+										"value": "@concat('fhir/',pipeline().parameters.DatasetSize,'/PatientIdentifier')",
+										"type": "Expression"
+									},
+									"wildcardFileName": "*.parquet",
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"allowCopyCommand": true,
+								"copyCommandSettings": {},
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "StorageLS",
+									"type": "LinkedServiceReference",
+									"parameters": {
+										"StorageName": {
+											"value": "@pipeline().parameters.StorageName",
+											"type": "Expression"
+										}
+									}
+								},
+								"path": "staging"
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "patient_id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "patient_id",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "birthDate",
+											"type": "String"
+										},
+										"sink": {
+											"name": "birthDate",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "deceasedDateTime",
+											"type": "String"
+										},
+										"sink": {
+											"name": "deceasedDateTime",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "gender",
+											"type": "String"
+										},
+										"sink": {
+											"name": "gender",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "text",
+											"type": "String"
+										},
+										"sink": {
+											"name": "text",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "multipleBirthBoolean",
+											"type": "Boolean"
+										},
+										"sink": {
+											"name": "multipleBirthBoolean",
+											"type": "Boolean"
+										}
+									},
+									{
+										"source": {
+											"name": "multipleBirthInteger",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "multipleBirthInteger",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "resourceType",
+											"type": "String"
+										},
+										"sink": {
+											"name": "resourceType",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "div",
+											"type": "String"
+										},
+										"sink": {
+											"name": "div",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "status",
+											"type": "String"
+										},
+										"sink": {
+											"name": "status",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "identifier.system",
+											"type": "String"
+										},
+										"sink": {
+											"name": "identifier.system",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "identifier.type.coding.code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "identifier.type.coding.code",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "identifier.type.coding.display",
+											"type": "String"
+										},
+										"sink": {
+											"name": "identifier.type.coding.display",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "identifier.type.coding.system",
+											"type": "String"
+										},
+										"sink": {
+											"name": "identifier.type.coding.system",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "identifier.type.text",
+											"type": "String"
+										},
+										"sink": {
+											"name": "identifier.type.text",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "identifier.value",
+											"type": "String"
+										},
+										"sink": {
+											"name": "identifier.value",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "PatientIdentifierParquetLarge",
+								"type": "DatasetReference",
+								"parameters": {
+									"StorageName": {
+										"value": "@pipeline().parameters.StorageName",
+										"type": "Expression"
+									},
+									"DatasetSize": {
+										"value": "@pipeline().parameters.DatasetSize",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "PatientIdentifierSQLLarge",
+								"type": "DatasetReference",
+								"parameters": {
+									"DatabaseName": {
+										"value": "@pipeline().parameters.DatabaseName",
+										"type": "Expression"
+									},
+									"ServerName": {
+										"value": "@pipeline().parameters.ServerName",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Create Tables",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "PatientParquet2Sink",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "SynapseDedicatedPoolLS",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"DatabaseName": {
+									"value": "@pipeline().parameters.DatabaseName",
+									"type": "Expression"
+								},
+								"ServerName": {
+									"value": "@pipeline().parameters.ServerName",
+									"type": "Expression"
+								}
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "IF OBJECT_ID('fhir.PatientAddress') IS NOT NULL\r\nBEGIN\r\n    DROP TABLE [fhir].[PatientAddress]\r\nEND\r\n\r\n\r\nCREATE TABLE [fhir].[PatientAddress]\r\n( \r\n\t[id] [nvarchar](64)  NULL,\r\n\t[address.city] [nvarchar](50)  NULL,\r\n\t[address.country] [nvarchar](50)  NULL,\r\n\t[address.extension.extension.url] [nvarchar](50)  NULL,\r\n\t[address.extension.extension.valueDecimal] [float]  NULL,\r\n\t[address.extension.url] [nvarchar](1000)  NULL,\r\n\t[address.postalCode] [nvarchar](50)  NULL,\r\n\t[address.state] [nvarchar](50)  NULL\r\n)\r\nWITH\r\n(\r\n\tDISTRIBUTION = ROUND_ROBIN,\r\n\tHEAP\r\n)\r\n\r\nIF OBJECT_ID('fhir.PatientIdentifier') IS NOT NULL\r\nBEGIN\r\n    DROP TABLE [fhir].[PatientIdentifier]\r\nEND\r\n\r\nCREATE TABLE [fhir].[PatientIdentifier]\r\n( \r\n\t[patient_id] [nvarchar](64)  NULL,\r\n\t[birthDate] [nvarchar](200)  NULL,\r\n\t[deceasedDateTime] [nvarchar](200)  NULL,\r\n\t[gender] [nvarchar](50)  NULL,\r\n\t[text] [nvarchar](1000)  NULL,\r\n\t[multipleBirthBoolean] [bit]  NULL,\r\n\t[multipleBirthInteger] [bigint]  NULL,\r\n\t[resourceType] [nvarchar](100)  NULL,\r\n\t[div] [nvarchar](max)  NULL,\r\n\t[status] [nvarchar](500)  NULL,\r\n\t[identifier.system] [nvarchar](2000)  NULL,\r\n\t[identifier.type.coding.code] [nvarchar](500)  NULL,\r\n\t[identifier.type.coding.display] [nvarchar](1000)  NULL,\r\n\t[identifier.type.coding.system] [nvarchar](1000)  NULL,\r\n\t[identifier.type.text] [nvarchar](1000)  NULL,\r\n\t[identifier.value] [nvarchar](640)  NULL\r\n)\r\nWITH\r\n(\r\n\tDISTRIBUTION = ROUND_ROBIN,\r\n\tHEAP\r\n)"
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"StorageName": {
+						"type": "string",
+						"defaultValue": "synapsee2elake"
+					},
+					"DatabaseName": {
+						"type": "string",
+						"defaultValue": "synapsee2edw"
+					},
+					"ServerName": {
+						"type": "string",
+						"defaultValue": "synapsee2e"
+					},
+					"SparkPoolName": {
+						"type": "string",
+						"defaultValue": "synapsee2espark"
+					},
+					"DatasetSize": {
+						"type": "string",
+						"defaultValue": "1tb"
+					}
+				},
+				"folder": {
+					"name": "Patient"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/notebooks/Patient_Ingestion_NDJSON2Parquet')]",
+				"[concat(variables('workspaceId'), '/dataflows/PatientJSON_Flatten_large')]",
+				"[concat(variables('workspaceId'), '/datasets/PatientAddressParquetLarge')]",
+				"[concat(variables('workspaceId'), '/datasets/PatientAddressSQL')]",
+				"[concat(variables('workspaceId'), '/datasets/PatientIdentifierParquetLarge')]",
+				"[concat(variables('workspaceId'), '/datasets/PatientIdentifierSQLLarge')]",
+				"[concat(variables('workspaceId'), '/linkedServices/SynapseDedicatedPoolLS')]",
+				"[concat(variables('workspaceId'), '/linkedServices/StorageLS')]"
+			]
 		}
 	]
 }
