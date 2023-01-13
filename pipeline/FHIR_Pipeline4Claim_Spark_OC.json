@@ -484,7 +484,7 @@
 			},
 			"SparkPoolName": {
 				"type": "string",
-				"defaultValue": "rwe2esparkpool"
+				"defaultValue": "rwse2esparkpool"
 			},
 			"DatasetSize": {
 				"type": "string",
