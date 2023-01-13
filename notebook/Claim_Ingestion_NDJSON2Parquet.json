@@ -1,5 +1,5 @@
 {
-	"name": "Notebook 1",
+	"name": "Claim_Ingestion_NDJSON2Parquet",
 	"properties": {
 		"nbformat": 4,
 		"nbformat_minor": 2,
@@ -13,7 +13,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "c884b439-ce80-46ce-9078-611b2f6eec94"
+				"spark.autotune.trackingId": "bf357a40-f11d-4054-939f-f720844b487e"
 			}
 		},
 		"metadata": {
