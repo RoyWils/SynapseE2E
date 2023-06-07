@@ -185,7 +185,7 @@
 			},
 			"PauseOrResume": {
 				"type": "string",
-				"defaultValue": "Resume"
+				"defaultValue": "Pause"
 			}
 		},
 		"variables": {
