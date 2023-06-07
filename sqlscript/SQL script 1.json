@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "select * from ATable\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dwhexperiment",
+				"poolName": "dwhexperiment"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
