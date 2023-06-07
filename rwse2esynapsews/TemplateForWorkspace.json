@@ -28,6 +28,10 @@
 		"rwse2esynapsews-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://rwse2estorage.dfs.core.windows.net/"
+		},
+		"PauseTrigger_properties_StopDedicatedSQLPool_parameters_PauseOrResume": {
+			"type": "string",
+			"defaultValue": "Pause"
 		}
 	},
 	"variables": {
@@ -4707,6 +4711,46 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PauseTrigger')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "StopDedicatedSQLPool",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"PauseOrResume": "[parameters('PauseTrigger_properties_StopDedicatedSQLPool_parameters_PauseOrResume')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-06-07T14:48:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								54
+							],
+							"hours": [
+								15
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/StopDedicatedSQLPool')]"
 			]
 		}
 	]

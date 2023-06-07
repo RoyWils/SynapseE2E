@@ -19,6 +19,9 @@
 		},
 		"rwse2esynapsews-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://rwse2estorage.dfs.core.windows.net/"
+		},
+		"PauseTrigger_properties_StopDedicatedSQLPool_parameters_PauseOrResume": {
+			"value": "Pause"
 		}
 	}
 }
