@@ -4440,18 +4440,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/rwse2edefaultsqlpool')]",
-			"type": "Microsoft.Synapse/workspaces/sqlPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"collation": "SQL_Latin1_General_CP1_CI_AS",
-				"maxSizeBytes": 263882790666240,
-				"annotations": []
-			},
-			"dependsOn": [],
-			"location": "northeurope"
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/rwse2esparkpool')]",
 			"type": "Microsoft.Synapse/workspaces/bigDataPools",
 			"apiVersion": "2019-06-01-preview",
@@ -4475,6 +4463,251 @@
 			},
 			"dependsOn": [],
 			"location": "northeurope"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dwhexperiment')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "northeurope"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "select * from ATable\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "dwhexperiment",
+						"poolName": "dwhexperiment"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/StopDedicatedSQLPool')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetDedicatedPoolsForWorkspace",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:10:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Synapse/workspaces/',pipeline().parameters.WorkspaceName,'/sqlPools?api-version=2019-06-01-preview')",
+								"type": "Expression"
+							},
+							"connectVia": {
+								"referenceName": "AutoResolveIntegrationRuntime",
+								"type": "IntegrationRuntimeReference"
+							},
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com/"
+							}
+						}
+					},
+					{
+						"name": "SelectDedicatedPool",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "GetDedicatedPoolsForWorkspace",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetDedicatedPoolsForWorkspace').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@startswith(item().name,pipeline().parameters.SQLPoolName)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Grab status",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "SelectDedicatedPool",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "status",
+							"value": {
+								"value": "@activity('SelectDedicatedPool').output.Value[0].properties.status",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "State-PauseOrResume",
+						"type": "Switch",
+						"dependsOn": [
+							{
+								"activity": "Grab status",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"on": {
+								"value": "@concat(variables('status'),'-',pipeline().parameters.PauseOrResume)",
+								"type": "Expression"
+							},
+							"cases": [
+								{
+									"value": "Online-Pause",
+									"activities": [
+										{
+											"name": "Pause",
+											"type": "WebActivity",
+											"dependsOn": [],
+											"policy": {
+												"timeout": "0.00:15:00",
+												"retry": 3,
+												"retryIntervalInSeconds": 120,
+												"secureOutput": false,
+												"secureInput": false
+											},
+											"userProperties": [],
+											"typeProperties": {
+												"url": {
+													"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Synapse/workspaces/',pipeline().parameters.WorkspaceName,'/sqlPools/',pipeline().parameters.SQLPoolName,'/pause?api-version=2021-06-01-preview')",
+													"type": "Expression"
+												},
+												"connectVia": {
+													"referenceName": "AutoResolveIntegrationRuntime",
+													"type": "IntegrationRuntimeReference"
+												},
+												"method": "POST",
+												"headers": {},
+												"body": {
+													"value": "None",
+													"type": "Expression"
+												},
+												"authentication": {
+													"type": "MSI",
+													"resource": "https://management.azure.com/"
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "Paused-Resume",
+									"activities": [
+										{
+											"name": "Resume",
+											"type": "WebActivity",
+											"dependsOn": [],
+											"policy": {
+												"timeout": "0.00:15:00",
+												"retry": 3,
+												"retryIntervalInSeconds": 120,
+												"secureOutput": false,
+												"secureInput": false
+											},
+											"userProperties": [],
+											"typeProperties": {
+												"url": {
+													"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Synapse/workspaces/',pipeline().parameters.WorkspaceName,'/sqlPools/',pipeline().parameters.SQLPoolName,'/resume?api-version=2021-06-01-preview')",
+													"type": "Expression"
+												},
+												"connectVia": {
+													"referenceName": "AutoResolveIntegrationRuntime",
+													"type": "IntegrationRuntimeReference"
+												},
+												"method": "POST",
+												"headers": {},
+												"body": "None",
+												"authentication": {
+													"type": "MSI",
+													"resource": "https://management.azure.com/"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"ResourceGroup": {
+						"type": "string",
+						"defaultValue": "rgrwse2edemo"
+					},
+					"SubscriptionID": {
+						"type": "string",
+						"defaultValue": "fd0d9e7a-b5dc-46f5-8d1d-a694d10dd09f"
+					},
+					"WorkspaceName": {
+						"type": "string",
+						"defaultValue": "rwse2esynapsews"
+					},
+					"SQLPoolName": {
+						"type": "string",
+						"defaultValue": "dwhexperiment"
+					},
+					"PauseOrResume": {
+						"type": "string",
+						"defaultValue": "Resume"
+					}
+				},
+				"variables": {
+					"status": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Admin"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
 		}
 	]
 }
