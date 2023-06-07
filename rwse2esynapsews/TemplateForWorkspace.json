@@ -28,10 +28,6 @@
 		"rwse2esynapsews-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://rwse2estorage.dfs.core.windows.net/"
-		},
-		"PauseTrigger_properties_StopDedicatedSQLPool_parameters_PauseOrResume": {
-			"type": "string",
-			"defaultValue": "Pause"
 		}
 	},
 	"variables": {
@@ -4719,18 +4715,8 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "StopDedicatedSQLPool",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"PauseOrResume": "[parameters('PauseTrigger_properties_StopDedicatedSQLPool_parameters_PauseOrResume')]"
-						}
-					}
-				],
+				"runtimeState": "Stopped",
+				"pipelines": [],
 				"type": "ScheduleTrigger",
 				"typeProperties": {
 					"recurrence": {
@@ -4749,9 +4735,7 @@
 					}
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/StopDedicatedSQLPool')]"
-			]
+			"dependsOn": []
 		}
 	]
 }
