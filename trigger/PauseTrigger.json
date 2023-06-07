@@ -1,0 +1,35 @@
+{
+	"name": "PauseTrigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "StopDedicatedSQLPool",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"PauseOrResume": "Pause"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-06-07T14:48:00Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						52
+					],
+					"hours": [
+						15
+					]
+				}
+			}
+		}
+	}
+}
