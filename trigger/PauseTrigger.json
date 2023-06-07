@@ -2,7 +2,7 @@
 	"name": "PauseTrigger",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
@@ -23,7 +23,7 @@
 				"timeZone": "UTC",
 				"schedule": {
 					"minutes": [
-						54
+						57
 					],
 					"hours": [
 						15
