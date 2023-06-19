@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 2",
+	"properties": {
+		"content": {
+			"query": "--Creating stored procedure sp_help_revlogin in the master database\nIF OBJECT_ID ('sp_help_revlogin') IS NOT NULL\n  DROP PROCEDURE sp_help_revlogin\nGO\n\nCREATE PROCEDURE sp_help_revlogin @login_name sysname = NULL AS\nBEGIN\n  DECLARE @name sysname\n  DECLARE login_cursor CURSOR\n  FOR SELECT name FROM sys.syslogins WHERE name IS NOT NULL AND name = ISNULL (@login_name, name)\n  OPEN login_cursor\n  FETCH NEXT FROM login_cursor INTO @name\n  WHILE (@@fetch_status = 0)\n  BEGIN\n    DECLARE @type_desc varchar(60)\n    DECLARE @password_hash varbinary(256)\n    DECLARE @hasaccess int, @denylogin int\n    SELECT @type_desc = type_desc, @password_hash = password_hash, @hasaccess = hasaccess, @denylogin = denylogin FROM sys.sql_logins WHERE name = @name\n    PRINT '-- Login: ' + @name\n    PRINT 'CREATE LOGIN ' + QUOTENAME(@name) + ' WITH PASSWORD = ' + master.sys.fn_varbintohex (@password_hash) + ' HASHED, CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF'\n    FETCH NEXT FROM login_cursor INTO @name\n  END\n  CLOSE login_cursor\n  DEALLOCATE login_cursor\nEND\nGO\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "dwhexperiment"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
